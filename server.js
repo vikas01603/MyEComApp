@@ -12,27 +12,36 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// CORS
-const origin = process.env.CORS_ORIGIN || "http://localhost:3000";
-app.use(cors({ origin, credentials: true }));
+// ✅ CORS setup for your actual deployed frontend
+const origin = process.env.CORS_ORIGIN || "https://ecomapp-frontend-600d.onrender.com";
+app.use(
+  cors({
+    origin,
+    credentials: true,
+  })
+);
 
 // routes
 app.use("/api/auth", authRoutes);
 app.use("/api/items", itemsRoutes);
 app.use("/api/cart", cartRoutes);
 
-// test
+// test route to check backend
 app.get("/api/test", (req, res) => res.send("API OK"));
 
-// connect + listen
+// optional root route for browser check
+app.get("/", (req, res) => res.send("Backend Running ✅"));
+
+// connect to MongoDB and start server
 const MONGO_URI = process.env.MONGO_URI;
-mongoose.connect(MONGO_URI)
+mongoose
+  .connect(MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
-    const port = process.env.PORT || 5000;
+    const port = process.env.PORT || 5000; // Render injects its own PORT
     app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Mongo connection error:", err);
     process.exit(1);
   });
